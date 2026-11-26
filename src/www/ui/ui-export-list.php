@@ -434,8 +434,10 @@ class UIExportList extends FO_Plugin
     $newCopyrights, $NomostListNum, $uploadTreeTableName, $key, $exclude = '')
   {
     foreach ($newCopyrights as $copyright) {
-      $filePath = $this->treeDao->getFullPath($copyright["uploadtree_pk"],
-        $uploadTreeTableName);
+      $uploadtreePk = $copyright["uploadtree_pk"];
+      $filePath = $uploadtreePkToFilePath[$uploadtreePk] ??
+        $this->treeDao->getFullPath($uploadtreePk, $uploadTreeTableName);
+      $uploadtreePkToFilePath[$uploadtreePk] = $filePath;
       if ($exclude !== null && $exclude !== '' &&
         strpos($filePath, $exclude) !== false) {
         continue;
@@ -449,7 +451,6 @@ class UIExportList extends FO_Plugin
       $row = [];
       $row["content"] = $copyright[$key];
       $row["filePath"] = $filePath;
-      $uploadtreePkToFilePath[$copyright["uploadtree_pk"]] = $row["filePath"];
       $list[$row["filePath"]][] = $row;
     }
   }

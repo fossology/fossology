@@ -69,8 +69,8 @@
             Exclude:
             <input name="exclude" value="{{ exclude|e }}">
             <br/>
-            Exclude files containing some substring in the path. 'mac' and it should
-            exclude all files and directories containing the substring 'mac'.
+            Exclude files or directories whose name contains this text (case-sensitive).
+            Matching directories and their contents are excluded.
           </label>
         </li>
         <li>
@@ -152,8 +152,9 @@
             Exclude:
             <input name="exclude" value="{{ exclude|e }}">
             <br/>
-            Exclude files whose full path contains this text (case-sensitive).
-            For example, 'vendor/' excludes files inside that directory.
+            Copyright lists match this text against full paths.
+            License lists match each file or folder name separately.
+            Matching is case-sensitive.
             Characters such as '%' and '_' are matched literally.
           </label>
         </li>

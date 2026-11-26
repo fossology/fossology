@@ -165,7 +165,10 @@ class UIExportListTest extends \PHPUnit\Framework\TestCase
     $this->assertSame(['archive/src/main.c' => [
       ['content' => 'Kept', 'filePath' => 'archive/src/main.c'],
     ]], $lines);
-    $this->assertSame([42 => 'archive/src/main.c'], $paths);
+    $this->assertSame([
+      41 => $excludedPath,
+      42 => 'archive/src/main.c',
+    ], $paths);
   }
 
   public static function literalCopyrightExclusions()
@@ -175,6 +178,52 @@ class UIExportListTest extends \PHPUnit\Framework\TestCase
       'apostrophe' => ["vendor's", "archive/vendor's/library.c"],
       'percent' => ['%', 'archive/vendor%/library.c'],
       'underscore' => ['_', 'archive/vendor_/library.c'],
+    ];
+  }
+
+  /**
+   * @dataProvider repeatedCopyrightExclusions
+   */
+  public function testCopyrightPathsAreReusedAcrossFindings($exclude)
+  {
+    $filePath = 'archive/vendor/library.c';
+    $treeDao = M::mock(TreeDao::class);
+    $treeDao->shouldReceive('getFullPath')->with(41, 'uploadtree')->once()
+      ->andReturn($filePath);
+    Reflectory::setObjectsProperty($this->exportList, 'treeDao', $treeDao);
+
+    $lines = [];
+    $paths = [];
+    Reflectory::invokeObjectsMethodnameWith($this->exportList,
+      'updateCopyrightList', [
+        &$lines, &$paths,
+        [
+          ['uploadtree_pk' => 41, 'content' => 'First finding'],
+          ['uploadtree_pk' => 41, 'content' => 'Second finding'],
+        ],
+        -1, 'uploadtree', 'content', $exclude,
+      ]);
+    Reflectory::invokeObjectsMethodnameWith($this->exportList,
+      'updateCopyrightList', [
+        &$lines, &$paths,
+        [['uploadtree_pk' => 41, 'textfinding' => 'Edited finding']],
+        -1, 'uploadtree', 'textfinding', $exclude,
+      ]);
+
+    $expected = $exclude === '' ? [$filePath => [
+      ['content' => 'First finding', 'filePath' => $filePath],
+      ['content' => 'Second finding', 'filePath' => $filePath],
+      ['content' => 'Edited finding', 'filePath' => $filePath],
+    ]] : [];
+    $this->assertSame($expected, $lines);
+    $this->assertSame([41 => $filePath], $paths);
+  }
+
+  public static function repeatedCopyrightExclusions()
+  {
+    return [
+      'included file' => [''],
+      'excluded file' => ['vendor/'],
     ];
   }
 
