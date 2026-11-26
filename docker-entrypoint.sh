@@ -52,6 +52,10 @@ if [[ $# -eq 0 || ($# -eq 1 && "$1" == "scheduler") ]]; then
   /usr/local/lib/fossology/fo-postinstall --common --database --licenseref
 fi
 
+mkdir -p /var/local/cache/fossology
+chown -R www-data:www-data /var/local/cache/fossology
+chmod -R 775 /var/local/cache/fossology
+
 # Start Fossology
 echo
 echo 'Fossology initialisation complete; Starting up...'

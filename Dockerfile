@@ -104,7 +104,6 @@ RUN mkdir -p /var/log/apache2/ \
 
 COPY ./docker-entrypoint.sh /fossology/docker-entrypoint.sh
 RUN chmod +x /fossology/docker-entrypoint.sh
-RUN mkdir -p /var/local/cache/fossology && chown -R www-data:www-data /var/local/cache/fossology && chmod -R 775 /var/local/cache/fossology
 ENTRYPOINT ["/fossology/docker-entrypoint.sh"]
 
 COPY --from=builder /etc/cron.d/fossology /etc/cron.d/fossology
@@ -114,4 +113,8 @@ COPY --from=builder /usr/local/ /usr/local/
 # the database is filled in the entrypoint
 RUN /usr/local/lib/fossology/fo-postinstall --agent --common --scheduler-only \
      --web-only --no-running-database --python-experimental \
- && rm -rf /var/lib/apt/lists/*
+&& mkdir -p /var/local/cache/fossology \
+&& chown -R www-data:www-data /var/local/cache/fossology \
+&& chmod -R 775 /var/local/cache/fossology \
+&& rm -rf /var/lib/apt/lists/*
+
