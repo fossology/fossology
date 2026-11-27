@@ -94,6 +94,33 @@ class showjobs extends FO_Plugin
     return "<a title='Click to browse this upload' href='" . Traceback_uri() . "?mod=browse&upload=" . $row['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>" . $uploadFileName . "</a>";
   } // getUploadNameForGeekyScan()
 
+  /**
+   * @brief Check if the current user may pause, restart or cancel a job queue entry
+   *
+   * The job queue entry itself is checked, not only the upload given in the
+   * request. Otherwise write access to any upload would be enough to control
+   * every job in the system by passing an arbitrary jobid.
+   *
+   * @param int $jobQueuePk jq_pk of the job queue entry
+   * @param int $uploadPk   Upload id from the request (-1 for all jobs of the user)
+   * @return bool True if the action is allowed
+   */
+  private function canActOnJobQueue($jobQueuePk, $uploadPk)
+  {
+    if (empty($jobQueuePk) || $jobQueuePk < 0) {
+      return false;
+    }
+    $groupId = Auth::getGroupId();
+    if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_ADMIN) {
+      return true;
+    }
+    if ($uploadPk !== -1 && !$this->uploadDao->isEditable($uploadPk, $groupId)) {
+      return false;
+    }
+    return $this->jobDao->hasActionPermissionsOnJobQueue($jobQueuePk,
+      Auth::getUserId(), $groupId, $uploadPk);
+  }
+
   public function Output()
   {
     $page = "";
@@ -115,10 +142,7 @@ class showjobs extends FO_Plugin
       $jq_pk = GetParm("jobid",PARM_INTEGER);
       $uploadPk = GetParm("upload",PARM_INTEGER);
 
-      if (!($uploadPk === -1 &&
-            ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_ADMIN ||
-             $this->jobDao->hasActionPermissionsOnJob($jq_pk, Auth::getUserId(), Auth::getGroupId()))) &&
-          !$this->uploadDao->isEditable($uploadPk, Auth::getGroupId())) {
+      if (!$this->canActOnJobQueue($jq_pk, $uploadPk)) {
         $this->vars['message'] = _("Permission Denied to perform action");
       } else {
         $thisURL = Traceback_uri() . "?mod=" . $this->Name . "&upload=$uploadPk";
