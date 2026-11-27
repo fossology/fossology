@@ -76,6 +76,10 @@ foreach($Options as $optKey => $optVal)
       $sysconfdir = $optVal;
       break;
     case 'd': /* optional database name */
+      if (!is_string($optVal) || trim($optVal) === '') {
+        echo "Error: option -d requires a non-empty database name.\n";
+        exit(1);
+      }
       $DatabaseName = $optVal;
       break;
     case 'h': /* help */
@@ -95,6 +99,13 @@ require_once("$MODDIR/vendor/autoload.php");
 require_once("$MODDIR/lib/php/common-db.php");
 require_once("$MODDIR/lib/php/common-container.php");
 
+/* The database name comes from -d or, by default, from Db.conf */
+$dbConf = parse_ini_file("$SYSCONFDIR/Db.conf");
+if (!is_array($dbConf) || empty($dbConf['dbname'])) {
+  print "FATAL: unable to read the database name from $SYSCONFDIR/Db.conf\n";
+  exit(1);
+}
+
 /*
  * -d has to override the database name from Db.conf.  ConfigInit() reloads
  * Db.conf into $SysConf and DBconnect() builds the connection from that file,
@@ -103,17 +114,17 @@ require_once("$MODDIR/lib/php/common-container.php");
  * ConfigInit() has parsed Db.conf.
  */
 if (!empty($DatabaseName)) {
-  $dbConf = parse_ini_file("$SYSCONFDIR/Db.conf");
-  if (!is_array($dbConf)) {
-    print "FATAL: unable to read $SYSCONFDIR/Db.conf\n";
-    exit(1);
-  }
   $dbConf['dbname'] = $DatabaseName;
   $dsn = array();
   foreach ($dbConf as $key => $value) {
     $dsn[] = "$key='" . str_replace("'", "\\'", $value) . "'";
   }
-  DBconnect($SYSCONFDIR, implode(' ', $dsn));
+  /* Do not let DBconnect() exit with status 0 on a failed connection */
+  DBconnect($SYSCONFDIR, implode(' ', $dsn), false);
+  if (empty($GLOBALS['PG_CONN'])) {
+    print "FATAL: unable to connect to database '$DatabaseName'.\n";
+    exit(1);
+  }
 }
 
 $projectGroup = $SysConf['DIRECTORIES']['PROJECTGROUP'] ?: 'fossy';
@@ -136,4 +147,6 @@ if (!empty($DatabaseName)) {
 
 $dbManager = $GLOBALS["container"]->get("db.manager");
 
-return recodeTables($dbManager, $MODDIR, $force);
+/* Propagate the result: 0 only when the migration completed */
+$returnCode = recodeTables($dbManager, $MODDIR, $force);
+exit($returnCode === 0 ? 0 : 1);

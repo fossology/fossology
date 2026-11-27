@@ -206,9 +206,8 @@ function startRecodingTables($dbManager, $MODDIR)
  */
 function getDbEncoding($dbManager)
 {
-  $dbName = $GLOBALS["SysConf"]["DBCONF"]["dbname"];
   $sql = "SELECT pg_encoding_to_char(encoding) AS encoding " .
-    "FROM pg_database WHERE datname = '$dbName';";
+    "FROM pg_database WHERE datname = current_database();";
   $row = $dbManager->getSingleRow($sql);
   return $row["encoding"];
 }
@@ -219,14 +218,32 @@ function getDbEncoding($dbManager)
  */
 function updateDbEncoding($dbManager)
 {
-  if (strcasecmp(getDbEncoding($dbManager), 'sql_ascii') == 0) {
-    $dbName = $GLOBALS["SysConf"]["DBCONF"]["dbname"];
-    $sql = "UPDATE pg_database SET encoding = pg_char_to_encoding('UTF8') " .
-      "WHERE datname = '$dbName';";
-    $cmd = 'su postgres --command "psql --command=\"BEGIN;' . $sql .
-      '\"COMMIT;"';
-    shell_exec($cmd);
+  if (strcasecmp(getDbEncoding($dbManager), 'sql_ascii') != 0) {
+    /* Encoding is already UTF-8, nothing to do */
+    return true;
   }
+
+  /*
+   * The change has to go through the connection which is already open.
+   * Shelling out only works when PostgreSQL listens on the local UNIX socket,
+   * so it silently did nothing when FOSSOLOGY_DB_HOST points to another host.
+   */
+  $sql = "UPDATE pg_database SET encoding = pg_char_to_encoding('UTF8') " .
+    "WHERE datname = current_database();";
+  try {
+    $dbManager->queryOnce($sql, "updateDbEncoding");
+  } catch (Exception $e) {
+    echo "*** Could not change the database encoding to UTF-8: the " .
+      "connected role must be a superuser ***\n";
+    return false;
+  }
+
+  if (strcasecmp(getDbEncoding($dbManager), 'sql_ascii') == 0) {
+    echo "*** Could not change the database encoding to UTF-8 ***\n";
+    return false;
+  }
+  echo "*** Database encoding changed to UTF-8. ***\n";
+  return true;
 }
 
 /**
@@ -270,14 +287,13 @@ function recodeTables($dbManager, $MODDIR, $force = false)
   if (! checkMigrate3738Required($dbManager)) {
     // Migration not required
     // Still change encoding of database from SQL_ASCII to UTF-8
-    updateDbEncoding($dbManager);
-    return 0;
+    return updateDbEncoding($dbManager) ? 0 : -1;
   }
   $totalRecords = calculateNumberOfRecordsToRecode($dbManager);
 
   if ($totalRecords == 0) {
-    // Migration not required
-    return 0;
+    // Nothing to recode, but the encoding may still need to change
+    return updateDbEncoding($dbManager) ? 0 : -1;
   }
   $envYes = getenv('FOSSENCODING');
   if (!$force) {
@@ -307,12 +323,15 @@ function recodeTables($dbManager, $MODDIR, $force = false)
   try {
     echo "*** Recoding entries in copyright and sister tables ***\n";
     startRecodingTables($dbManager, $MODDIR);
-    updateDbEncoding($dbManager);
+    if (! updateDbEncoding($dbManager)) {
+      return -1;
+    }
   } catch (Exception $e) {
     echo "*** Something went wrong. Try again! ***\n";
     $dbManager->rollback();
     return -1;
   }
+  return 0;
 }
 
 /**
