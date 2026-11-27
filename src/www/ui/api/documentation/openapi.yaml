@@ -7313,6 +7313,15 @@ components:
       description: Information required by SPDX RDF report import agent.
       type: object
       properties:
+        licenseMatch:
+          type: string
+          description: >
+            With spdxid, try the SPDX ID first and fall back to the FOSSology
+            shortname. With shortname, match only by FOSSology shortname.
+          enum:
+            - spdxid
+            - shortname
+          default: spdxid
         addNewLicensesAs:
           type: string
           description: Create new licenses as
