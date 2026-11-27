@@ -1257,6 +1257,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
   char *Val; /* string result from SQL query */
   long tempMimeType; ///< Temporary storage for mimetype fk from DB
   char *tempSha256; ///< Temporary storage for pfile_sha256 from DB
+  int updateSha256; ///< True if pfile_sha256 in DB needs to be updated
 
   /* idiot checking */
   if (!Fuid || (Fuid[0] == '\0')) return(1);
@@ -1316,6 +1317,8 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
     if (Verbose) LOG_DEBUG("pfile_pk = %ld",CI->pfile_pk);
     tempMimeType = atol(PQgetvalue(result,0,1));
     tempSha256 = PQgetvalue(result,0,2);
+    /* Compare now, result may be cleared before the SHA256 update below */
+    updateSha256 = (strncasecmp(tempSha256, Fuid+74, 64) != 0);
     /* For backwards compatibility... Do we need to update the mimetype? */
     if ((CMD[CI->PI.Cmd].DBindex > 0) &&
         ((tempMimeType != CMD[CI->PI.Cmd].DBindex)))
@@ -1328,7 +1331,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
       if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(16);
     }
     /* Update the SHA256 for the pfile if it does not exists */
-    if (strncasecmp(tempSha256, Fuid+74, 64) != 0)
+    if (updateSha256)
     {
       PQclear(result);
       memset(SQL,'\0',MAXSQL);
@@ -1449,9 +1452,9 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     if (fo_checkPQresult(pgConn, result, UfileName, __FILE__, __LINE__)) SafeExit(17);
     memset(UfileName,'\0',sizeof(UfileName));
     ufile_name = PQgetvalue(result,0,0);
-    PQclear(result);
     if (strchr(ufile_name,'/')) ufile_name = strrchr(ufile_name,'/')+1;
     strncpy(CI->Partname,ufile_name,sizeof(CI->Partname)-1);
+    PQclear(result);
   }
   else if (CI->Artifact)
   {

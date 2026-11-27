@@ -518,10 +518,10 @@ int	Traverse	(char *Filename, char *Basename,
             SafeExit(31);
           }
           UFileName = PQgetvalue(result,0,0);
-          PQclear(result);
           if (strchr(UFileName, '/')) UFileName = strrchr(UFileName, '/') + 1;
           memset(UploadFileName, '\0', FILENAME_MAX);
           strncpy(UploadFileName, UFileName, FILENAME_MAX - 1);
+          PQclear(result);
         }
 
         break;
