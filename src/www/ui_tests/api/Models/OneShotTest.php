@@ -1,6 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2025 Harshit Gandhi <gandhiharshit716@gmail.com>
+ SPDX-FileCopyrightText: © 2026 Gaurav Kumar <Student-sst@outlook.com>
  SPDX-License-Identifier: GPL-2.0-only
 */
 /**
@@ -12,6 +13,7 @@ use Fossology\UI\Api\Models\OneShot;
 use Fossology\Lib\Data\Highlight;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Yaml\Parser;
 
 /**
  * @class OneShotTest
@@ -33,7 +35,7 @@ class OneShotTest extends TestCase
     $highlights = [$testHighlight];
 
     $oneShot = new OneShot($testData, $highlights);
-    
+
     $this->assertInstanceOf(OneShot::class, $oneShot);
   }
 
@@ -175,5 +177,49 @@ class OneShotTest extends TestCase
     ];
 
     $this->assertEquals(json_encode($expectedArray), $oneShot->getJSON());
+  }
+
+  /**
+   * @dataProvider responseSchemaProvider
+   */
+  public function testResponseFieldsAreDocumented($specification, $endpoint,
+    $field, $data)
+  {
+    $parser = new Parser();
+    $document = $parser->parse(file_get_contents(__DIR__ .
+      '/../../../ui/api/documentation/' . $specification));
+    $reference = $document['paths']['/uploads/oneshot/' . $endpoint]['post']
+      ['responses']['200']['content']['application/json']['schema']['$ref'];
+    $schemaName = basename($reference);
+    $schema = $document['components']['schemas'][$schemaName];
+    $properties = $schema['properties'];
+    $response = (new OneShot($data, []))->getArray($field);
+
+    $this->assertEqualsCanonicalizing(array_keys($response),
+      array_keys($properties));
+    $this->assertEqualsCanonicalizing(array_keys($response), $schema['required']);
+    foreach ($response as $name => $value) {
+      $this->assertArrayHasKey($name, $properties);
+      $variants = $properties[$name]['oneOf'] ?? [$properties[$name]];
+      $type = is_array($value) ? 'array' : 'string';
+      $this->assertContains($type, array_column($variants, 'type'));
+      foreach ($variants as $variant) {
+        if ($variant['type'] === 'array') {
+          $this->assertArrayHasKey('items', $variant);
+        }
+      }
+    }
+  }
+
+  public static function responseSchemaProvider()
+  {
+    foreach (['openapi.yaml', 'openapiv2.yaml'] as $specification) {
+      yield $specification . ' nomos' => [$specification, 'nomos', 'licenses', ' MIT '];
+      yield $specification . ' nomos no match' => [$specification, 'nomos', 'licenses', ' No_license_found '];
+      yield $specification . ' monk' => [$specification, 'monk', 'licenses', ['MIT', 'Apache-2.0']];
+      yield $specification . ' monk no match' => [$specification, 'monk', 'licenses', []];
+      yield $specification . ' ceu' => [$specification, 'ceu', 'copyrights', ['Copyright 2026 Example']];
+      yield $specification . ' ceu no match' => [$specification, 'ceu', 'copyrights', []];
+    }
   }
 }
