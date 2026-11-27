@@ -14,6 +14,22 @@
 
 ;(function($) {
 
+  // drop elements nested in an earlier one, find() on the rest has no duplicates to sort out
+  function outermost(elements) {
+    var last;
+    return elements.filter(function() {
+      if (last && $.contains(last, this)) {
+        return false;
+      }
+      last = this;
+      return true;
+    });
+  }
+
+  function hasHiddenList() {
+    return $(this).children("ul:hidden").length > 0;
+  }
+
   // TODO rewrite as a widget, removing all the extra plugins
   $.extend($.fn, {
     swapClass: function(c1, c2) {
@@ -64,29 +80,33 @@
       return this.filter(":has(>ul)");
     },
     applyClasses: function(settings, toggler) {
+      var roots = outermost(this);
       // TODO use event delegation
       this.filter(":has(>ul):not(:has(>a))").find(">span").unbind("click.treeview").bind("click.treeview", function(event) {
         // don't handle click events on children, eg. checkboxes
         if ( this == event.target ) {
           toggler.apply($(this).next());
         }
-      }).add( $("a", this) ).hoverClass();
+      }).hoverClass();
+      // not add()ed to the spans above, add() sorts every link by document order
+      roots.find("a").hoverClass();
             
       if (!settings.prerendered) {
         // handle closed ones first
-        this.filter(":has(>ul:hidden)")
+        this.filter(hasHiddenList)
                         .addClass(CLASSES.expandable)
                         .replaceClass(CLASSES.last, CLASSES.lastExpandable);
                         
         // handle open ones
-        this.not(":has(>ul:hidden)")
+        this.not(hasHiddenList)
                         .addClass(CLASSES.collapsable)
                         .replaceClass(CLASSES.last, CLASSES.lastCollapsable);
                         
                 // create hitarea if not present
-        var hitarea = this.find("div." + CLASSES.hitarea);
+        var hitarea = roots.find("div." + CLASSES.hitarea);
         if (!hitarea.length) {
-          hitarea = this.prepend("<div class=\"" + CLASSES.hitarea + "\"/>").find("div." + CLASSES.hitarea);
+          this.prepend("<div class=\"" + CLASSES.hitarea + "\"/>");
+          hitarea = roots.find("div." + CLASSES.hitarea);
         }
         hitarea.removeClass().addClass(CLASSES.hitarea).each(function() {
           var classes = "";
@@ -98,7 +118,7 @@
       }
             
       // apply event to hitarea
-      this.find("div." + CLASSES.hitarea).click( toggler );
+      roots.find("div." + CLASSES.hitarea).click( toggler );
     },
     treeview: function(settings) {
             

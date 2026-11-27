@@ -11,7 +11,6 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\UI\FolderNav;
 use Fossology\Lib\UI\MenuHook;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -171,8 +170,6 @@ class ui_browse extends FO_Plugin
     if ($rootFolder == NULL) {
       $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
     }
-    /* @var $uiFolderNav FolderNav */
-    $uiFolderNav = $GLOBALS['container']->get('ui.folder.nav');
 
     $folderNav = '<div id="sidetree" class="container justify-content-center" style="min-width: 234px;">';
     if ($folderId != $rootFolder->getId()) {
@@ -187,7 +184,8 @@ class ui_browse extends FO_Plugin
       <div class="col-sm-20" style="margin-top:-10px;">
         <input id="searchFolderTree" type="text" class="form-control" name="searchFolderTree" placeholder="Search folder" autofocus="autofocus"">
       </div>';
-    $folderNav .= $uiFolderNav->showFolderTree($folderId).'</div>';
+    /* the tree itself is loaded by ui-browse.js.twig from browse-processPost */
+    $folderNav .= '<div id="foldertree"></div></div>';
 
     $this->vars['folderNav'] = $folderNav;
 
