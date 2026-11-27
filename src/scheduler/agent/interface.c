@@ -244,7 +244,9 @@ void interface_thread(interface_connection* conn, scheduler_t* scheduler)
       }
       else if((job = g_tree_lookup(scheduler->job_list, &i)) == NULL)
       {
-        arg3 = g_strdup_printf(jobsql_failed, arg2, i);
+        /* not in the job list: either still queued or already finished, only
+         * mark it killed if it has not finished yet */
+        arg3 = g_strdup_printf(jobsql_kill_unfinished, arg2, i);
         event_signal(database_exec_event, arg3);
       }
       else
