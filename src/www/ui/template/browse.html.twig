@@ -1,4 +1,5 @@
 {# SPDX-FileCopyrightText: © 2014-2017 Siemens AG
+   SPDX-FileCopyrightText: © 2026 Gaurav Kumar <Student-sst@outlook.com>
 
    SPDX-License-Identifier: FSFAP
 #}
@@ -34,16 +35,20 @@
             <tr>
               <th></th>
               <th>
-                <select id="scanFilter" class="ui-render-select2 form-control-sm">
-                  <option value="0">-- {{'filter for scan results'|trans}} --</option>
+                <select id="scanFilter" class="ui-render-select2 form-control-sm" multiple
+                    style="width:100%" data-placeholder="{{ 'Filter for scan results'|trans }}"
+                    aria-label="{{ 'Filter for scan results'|trans }}"
+                    title="{{ 'Show files matching any selected license'|trans }}">
                   {% for shortname,row in scannerLicenses %}
                     <option value="{{row.rf_pk}}">{{ shortname }}</option>
                   {% endfor %}
                 </select>
               </th>
               <th>
-                <select id="conFilter" class="ui-render-select2 form-control-sm">
-                  <option value="0">-- {{'filter for edited results'|trans}} --</option>
+                <select id="conFilter" class="ui-render-select2 form-control-sm" multiple
+                    style="width:100%" data-placeholder="{{ 'Filter for edited results'|trans }}"
+                    aria-label="{{ 'Filter for edited results'|trans }}"
+                    title="{{ 'Show files matching any selected license'|trans }}">
                   {% for shortname,row in editedLicenses %}
                     <option value="{{row.rf_pk}}">{{ shortname }}</option>
                   {% endfor %}

@@ -1,5 +1,6 @@
 /*
  SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+ SPDX-FileCopyrightText: © 2026 Gaurav Kumar <Student-sst@outlook.com>
  Author: Daniele Fognini, Johannes Najjar, Steffen Weber
 
  SPDX-License-Identifier: GPL-2.0-only
@@ -37,25 +38,20 @@ $(document).ready(function () {
 
   searchField = $('#dirlist_filter input');
   var dirListFilter = getCookie('dirListFilter');
-  filterLicense(dirListFilter);
+  searchField.val(dirListFilter).trigger('keyup');
   searchField.keyup(function () {
     setCookie('dirListFilter', $(this).val());
   });
   
-  var scanFilter = getCookie('scanFilter');
-  if(scanFilter==="") {
-    scanFilter = 0;
-  }
-  $('#scanFilter option[value='+scanFilter+']').parent().val(scanFilter);
-  $('#scanFilter').change(function (){ filterScan($(this).val(),'scan'); });
+  ['scan', 'con'].forEach(function (keyword) {
+    var select = $('#' + keyword + 'Filter');
+    var saved = getCookie(keyword + 'Filter').split(',');
+    // Other pages still use a single-select filter and share these cookies.
+    select.val(select.prop('multiple') ? saved : (saved[0] || '0'));
+    select.trigger('change.select2');
+    select.change(function () { filterScan($(this).val(), keyword); });
+  });
 
-  var conFilter = getCookie('conFilter');
-  if(conFilter==="") {
-    conFilter = 0;
-  }
-  $('#conFilter option[value='+conFilter+']').parent().val(conFilter);
-  $('#conFilter').change(function (){ filterScan($(this).val(),'con'); });
-  
   var openFilter = getCookie('openFilter');
   if(openFilter==='true' || openFilter==='checked') {
     $('#openCBoxFilter').prop('checked',openFilter);
@@ -93,7 +89,8 @@ function clearSearchFiles() {
   var searchField = $('#dirlist_filter input');
   searchField.val('');
   resetFilters();
-  searchField.trigger('keyup');
+  setCookie('dirListFilter', '');
+  otable.fnFilter('');
 }
 
 
@@ -174,21 +171,20 @@ function dressContents(data, type, full) {
 }
 
 function filterScan(id,keyword) {
-  if(keyword==='scan'){
-    $('#scanFilter').val(id);
-    setCookie('scanFilter', id);
-  }
-  else if(keyword==='con')
-  {
-    $('#conFilter').val(id);
-    setCookie('conFilter', id);
-  }
+  if (keyword !== 'scan' && keyword !== 'con') return;
+  var select = $('#' + keyword + 'Filter');
+  select.val(id).trigger('change.select2');
+  setCookie(keyword + 'Filter', select.val() || '');
   otable.fnFilter('');
 }
 
 function resetFilters()
 {
-  $('#scanFilter').val(0);
-  $('#conFilter').val(0);
-  $('#openCBoxFilter').attr('checked',false);
+  ['scan', 'con'].forEach(function (keyword) {
+    var select = $('#' + keyword + 'Filter');
+    select.val(select.prop('multiple') ? [] : '0').trigger('change.select2');
+    setCookie(keyword + 'Filter', '');
+  });
+  $('#openCBoxFilter').prop('checked', false);
+  setCookie('openFilter', false);
 }

@@ -1,5 +1,7 @@
 SPDX-FileCopyrightText: © 2008 Hewlett-Packard Development Company, L.P.
 
+SPDX-FileCopyrightText: © 2026 Gaurav Kumar <Student-sst@outlook.com>
+
 SPDX-License-Identifier: GPL-2.0-only
 
 UI directory structure (current source tree)
@@ -48,3 +50,16 @@ The load order:
       that depend on them.
   - After sorting, PostInitialize() is called. This can use any dependent
     modules.
+
+License Browser filters
+
+The Scanner Results and Edited Results filters accept multiple licenses.
+Within each filter, a file matches any selected license. When both filters
+are set, both conditions must match. Tree view keeps directories containing
+matching descendants; flat view shows the matching files.
+
+Remove a selected license using its x button, or use Clear beside the file
+search to reset the filters. Selections are remembered when navigating or
+reloading the browser. Clicking a license in the histogram replaces the
+Scanner Results selection with that license. These controls do not change
+clearing decisions or scanner results.

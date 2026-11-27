@@ -1,6 +1,7 @@
 <?php
 /*
  SPDX-FileCopyrightText: © 2014-2015 Siemens AG
+ SPDX-FileCopyrightText: © 2026 Gaurav Kumar <Student-sst@outlook.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
@@ -174,8 +175,9 @@ class UploadTreeProxy extends DbViewProxy
       $agentIdSet = '{' . implode(',', array_values($options[self::OPT_AGENT_SET])) . '}';
       $filter .= " agent_fk=ANY(".$this->addParamAndGetExpr('agentIdSet', $agentIdSet).") AND";
     }
-    $rfId = $this->addParamAndGetExpr('scanRef', $options[self::OPT_SCAN_REF]);
-    return $filter . " (license_file.rf_fk=$rfId OR rf_parent=$rfId) AND ";
+    $rfIds = '{' . implode(',', (array) $options[self::OPT_SCAN_REF]) . '}';
+    $rfIds = $this->addParamAndGetExpr('scanRef', $rfIds);
+    return $filter . " (license_file.rf_fk=ANY($rfIds) OR rf_parent=ANY($rfIds)) AND ";
   }
 
   private function subqueryConcludeRefMatches($itemTable,$options)
@@ -196,16 +198,19 @@ class UploadTreeProxy extends DbViewProxy
       $orderByGlobal = "CASE cd.scope WHEN " . DecisionScopes::REPO .
         " THEN 1 ELSE 0 END,";
     }
-    return "NOT(SELECT (removed OR cd.decision_type=".DecisionTypes::IRRELEVANT.") excluded"
+    $rfIds = '{' . implode(',', (array) $options[self::OPT_CONCLUDE_REF]) . '}';
+    // Keep the latest decision for each license before checking any matches.
+    return "EXISTS(SELECT 1 FROM (SELECT DISTINCT ON (ce.rf_fk)"
+            . " (removed OR cd.decision_type=".DecisionTypes::IRRELEVANT.") excluded"
             . " FROM clearing_decision cd, clearing_decision_event cde, clearing_event ce"
          . "    WHERE ((cd.group_fk=".$this->addParamAndGetExpr('groupId', $options[self::OPT_GROUP_ID])
          . "      AND cd.uploadtree_fk=$itemTable.uploadtree_pk)"
          . $globalSql
          . ")     AND clearing_decision_pk=clearing_decision_fk"
          . "      AND clearing_event_fk=clearing_event_pk"
-         . "      AND rf_fk=".$this->addParamAndGetExpr('conId',$options[self::OPT_CONCLUDE_REF])
+         . "      AND rf_fk=ANY(".$this->addParamAndGetExpr('conId', $rfIds).")"
          . "      AND cd.decision_type!=".DecisionTypes::WIP
-         . "      ORDER BY $orderByGlobal cd.date_added DESC LIMIT 1)";
+         . "      ORDER BY ce.rf_fk, $orderByGlobal cd.date_added DESC) latest WHERE NOT excluded)";
   }
 
   /**
