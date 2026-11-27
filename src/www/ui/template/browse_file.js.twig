@@ -103,8 +103,8 @@ $(document).ready(function () {
         currentArray.push(getCurrentVal);
       }
     });
-    if (currentArray.length === 0 || currentArray.length === 1) {
-      alert('Kindly choose multiple checkboxes in the actions column!');
+    if (currentArray.length === 0) {
+      alert('Kindly choose atleast one checkbox in the actions column!');
       $('#editFilter').val(0);
     } else if (operationType == 1) {
       openUserModal(currentArray);

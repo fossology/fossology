@@ -113,4 +113,8 @@ COPY --from=builder /usr/local/ /usr/local/
 # the database is filled in the entrypoint
 RUN /usr/local/lib/fossology/fo-postinstall --agent --common --scheduler-only \
      --web-only --no-running-database --python-experimental \
- && rm -rf /var/lib/apt/lists/*
+&& mkdir -p /var/local/cache/fossology \
+&& chown -R www-data:www-data /var/local/cache/fossology \
+&& chmod -R 775 /var/local/cache/fossology \
+&& rm -rf /var/lib/apt/lists/*
+
