@@ -233,7 +233,8 @@ class SpdxAgent extends Agent
       }
     }
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::REPORT, true);
-    $this->computeUri($uploadId);
+    $additionalUploadIds = empty($args[self::UPLOAD_ADDS]) ? [] : explode(',', $args[self::UPLOAD_ADDS]);
+    $this->computeUri($uploadId, $additionalUploadIds);
     $docLicense = $this->licenseDao->getLicenseByShortName(self::DATA_LICENSE);
     $docLicenseId = $docLicense->getId() . "-" . md5($docLicense->getText());
     $this->licensesInDocument[$docLicenseId] = (new SpdxLicenseInfo())
@@ -242,7 +243,6 @@ class SpdxAgent extends Agent
       ->setCustomText(false)
       ->setTextPrinted(true);
     $packageNodes = $this->renderPackage($uploadId);
-    $additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$args) ? explode(',',$args[self::UPLOAD_ADDS]) : array();
     $packageIds = array($uploadId);
     foreach ($additionalUploadIds as $additionalId) {
       $packageNodes .= $this->renderPackage($additionalId);
@@ -287,7 +287,7 @@ class SpdxAgent extends Agent
   /**
    * @brief Generate report basename based on upload name
    *
-   * The base name is in format <b>`<OutputFormat>_<packagename>_<timestamp><.spdx.rdf|.spdx|.txt|.csv>`</b>
+   * The basename combines the output format, package name and file extension.
    * @param string $packageName Name of the upload
    * @return string Report file's base name
    */
@@ -329,12 +329,13 @@ class SpdxAgent extends Agent
   /**
    * @brief Get absolute path for report
    * @param string $packageName Name of the upload
+   * @param int $uploadId Primary upload ID
+   * @param int[] $additionalUploadIds Additional uploads in report order
    * @return string Absolute file path for report
    */
-  protected function getFileName($packageName)
+  protected function getFileName($packageName, $uploadId, $additionalUploadIds = array())
   {
-    global $SysConf;
-    $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
+    $fileBase = ReportUtils::getReportDirectory($uploadId, $this->groupId, $additionalUploadIds);
     return $fileBase. $this->getFileBasename($packageName);
   }
 
@@ -631,14 +632,16 @@ class SpdxAgent extends Agent
   /**
    * @brief For a given upload, compute the URI and filename for the report
    * @param int $uploadId
+   * @param int[] $additionalUploadIds Additional uploads in report order
    */
-  protected function computeUri($uploadId)
+  protected function computeUri($uploadId, $additionalUploadIds = array())
   {
     $upload = $this->uploadDao->getUpload($uploadId);
     $packageName = $upload->getFilename();
+    $this->filebasename = null;
 
     $this->uri = $this->getUri($packageName);
-    $this->filename = $this->getFileName($packageName);
+    $this->filename = $this->getFileName($packageName, $uploadId, $additionalUploadIds);
   }
 
   /**
@@ -651,12 +654,6 @@ class SpdxAgent extends Agent
   {
     global $SysConf;
     $stateOsselot = $this->getSPDXReportConf($uploadId, 2);
-    $fileBase = dirname($this->filename);
-
-    if (!is_dir($fileBase)) {
-      mkdir($fileBase, 0777, true);
-    }
-    umask(0133);
 
     $organizationName = $SysConf['SYSCONFIG']["ReportHeaderText"] ?? 'FOSSology';
     $version = $SysConf['BUILD']['VERSION'];
@@ -696,19 +693,7 @@ class SpdxAgent extends Agent
     // 'Non-printable' is ASCII < 0x20 (excluding \r, \n and tab) and 0x7F (delete).
     $message = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/','?',$message);
 
-    file_put_contents($this->filename, $message);
-    $this->updateReportTable($uploadId, $this->jobId, $this->filename);
-  }
-
-  /**
-   * @brief Update the reportgen table with new report path
-   * @param int $uploadId    Upload id
-   * @param int $jobId       Job id
-   * @param string $fileName File name of the report
-   */
-  protected function updateReportTable($uploadId, $jobId, $fileName)
-  {
-    $this->reportutils->updateOrInsertReportgenEntry($uploadId, $jobId, $fileName);
+    $this->reportutils->saveTextReport($uploadId, $this->jobId, $this->filename, $message);
   }
 
   protected function validateLicenseIdentifiers()

@@ -12,6 +12,7 @@ use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\AllDecisionsDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Report\ReportUtils;
 
 include_once(__DIR__ . "/version.php");
 
@@ -140,21 +141,12 @@ class DecisionExporter extends Agent
    */
   private function writeReport($contents, $uploadId)
   {
-    global $SysConf;
-
     $packageName = $this->uploadDao->getUpload($uploadId)->getFilename();
-
-    $fileBase = $SysConf['FOSSOLOGY']['path'] . "/report/";
+    $fileBase = ReportUtils::getReportDirectory($uploadId, $this->groupId) . 'job-' . (int) $this->jobId . '/';
     $fileName = $fileBase . "FOSSology_Decisions_" . $packageName . '_' . date("d_m_Y_H_i_s") . ".json";
+    $report = json_encode($contents, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
 
-    if (!is_dir($fileBase)) {
-      mkdir($fileBase, 0777, true);
-    }
-    umask(0133);
-
-    file_put_contents($fileName, json_encode($contents, JSON_UNESCAPED_SLASHES));
-
-    $this->updateReportTable($uploadId, $this->jobId, $fileName);
+    (new ReportUtils())->saveTextReport($uploadId, $this->jobId, $fileName, $report);
   }
 
   /**
@@ -188,18 +180,6 @@ class DecisionExporter extends Agent
   {
     $this->dbManager->getSingleRow("DROP TABLE IF EXISTS ".$tableName.";",
       array(), __METHOD__);
-  }
-
-  /**
-   * @brief Update database with generated report path.
-   * @param int $uploadId
-   * @param int $jobId
-   * @param string $filename
-   */
-  private function updateReportTable($uploadId, $jobId, $filename)
-  {
-    $this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)",
-      array($uploadId, $jobId, $filename), __METHOD__);
   }
 }
 

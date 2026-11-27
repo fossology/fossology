@@ -185,11 +185,10 @@ class CycloneDXAgent extends Agent
    */
   protected function computeUri($uploadId)
   {
-    global $SysConf;
     $upload = $this->uploadDao->getUpload($uploadId);
     $this->packageName = $upload->getFilename();
 
-    $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
+    $fileBase = ReportUtils::getReportDirectory($uploadId, $this->groupId, $this->additionalUploads);
 
     $this->uri = $this->getUri($fileBase);
   }
@@ -457,30 +456,11 @@ class CycloneDXAgent extends Agent
    */
   protected function writeReport($packageNodes, $uploadId)
   {
-    $fileBase = dirname($this->uri);
-
-    if (!is_dir($fileBase)) {
-      mkdir($fileBase, 0777, true);
-    }
-    umask(0133);
-
-    $contents = json_encode($packageNodes, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    $contents = json_encode($packageNodes, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
     // To ensure the file is valid, replace any non-printable characters with a question mark.
     // 'Non-printable' is ASCII < 0x20 (excluding \r, \n and tab) and 0x7F - 0x9F.
     $contents = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/u','?',$contents);
-    file_put_contents($this->uri, $contents);
-    $this->updateReportTable($uploadId, $this->jobId, $this->uri);
-  }
-
-  /**
-   * @brief Update the reportgen table with new report path
-   * @param int $uploadId    Upload id
-   * @param int $jobId       Job id
-   * @param string $fileName File name of the report
-   */
-  protected function updateReportTable($uploadId, $jobId, $fileName)
-  {
-    $this->reportutils->updateOrInsertReportgenEntry($uploadId, $jobId, $fileName);
+    $this->reportutils->saveTextReport($uploadId, $this->jobId, $this->uri, $contents);
   }
 
   /**

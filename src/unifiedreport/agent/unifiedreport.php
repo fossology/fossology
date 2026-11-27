@@ -688,8 +688,6 @@ class UnifiedReport extends Agent
    */
   private function writeReport($contents, $uploadId, $groupId, $userId)
   {
-    global $SysConf;
-
     $userName = $this->userDao->getUserName($userId);
     $groupName = $this->userDao->getGroupNameById($groupId);
     $packageName = $this->uploadDao->getUpload($uploadId)->getFilename();
@@ -949,28 +947,16 @@ class UnifiedReport extends Agent
     /* Footer starts */
     $reportStaticSection->reportFooter($phpWord, $section, $contents['otherStatement']);
 
-    $fileBase = $SysConf["FOSSOLOGY"]["path"]."/report/";
-    if (!is_dir($fileBase)) {
-      mkdir($fileBase, 0777, true);
-    }
-    umask(0022);
+    $fileBase = ReportUtils::getReportDirectory($uploadId, $groupId);
     $fileName = $fileBase. "Clearing_Report_".$packageName.".docx";
     $objWriter = IOFactory::createWriter($phpWord, "Word2007");
-    $objWriter->save($fileName);
-
-    $this->updateReportTable($uploadId, $this->jobId, $fileName);
-  }
-
-
-  /**
-   * @brief Update database with generated report path.
-   * @param int $uploadId
-   * @param int $jobId
-   * @param string $filename
-   */
-  private function updateReportTable($uploadId, $jobId, $filename)
-  {
-    $this->reportutils->updateOrInsertReportgenEntry($uploadId, $jobId, $filename);
+    $this->reportutils->saveReport($uploadId, $this->jobId, $fileName,
+      static function ($temporaryFile) use ($objWriter) {
+        $objWriter->save($temporaryFile);
+        if (!is_file($temporaryFile) || !filesize($temporaryFile)) {
+          throw new \RuntimeException('Cannot write Unified Report');
+        }
+      });
   }
 }
 

@@ -167,11 +167,12 @@ class CliXml extends Agent
         $this->outputFormat = $possibleOutputFormat;
       }
     }
+    $additionalUploadIds = empty($args[self::UPLOAD_ADDS]) ? [] : explode(',', $args[self::UPLOAD_ADDS]);
+    $this->additionalUploads = $additionalUploadIds;
     $this->computeUri($uploadId);
 
     $contents = $this->renderPackage($uploadId, $groupId);
 
-    $additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$args) ? explode(',',$args[self::UPLOAD_ADDS]) : array();
     $packageIds = array($uploadId);
     foreach ($additionalUploadIds as $additionalId) {
       $contents .= $this->renderPackage($additionalId, $groupId);
@@ -488,37 +489,23 @@ class CliXml extends Agent
 
   protected function computeUri($uploadId)
   {
-    global $SysConf;
     $upload = $this->uploadDao->getUpload($uploadId);
     $this->packageName = $upload->getFilename();
 
-    $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
+    $fileBase = ReportUtils::getReportDirectory($uploadId, $this->groupId, $this->additionalUploads);
 
     $this->uri = $this->getUri($fileBase);
   }
 
   protected function writeReport($contents, $packageIds, $uploadId)
   {
-    $fileBase = dirname($this->uri);
-
-    if (!is_dir($fileBase)) {
-      mkdir($fileBase, 0777, true);
-    }
-    umask(0133);
-
     $message = $this->renderString($this->getTemplateFile('document'),
       array('content' => $contents));
 
     // To ensure the file is valid, replace any non-printable characters with a question mark.
     // 'Non-printable' is ASCII < 0x20 (excluding \r, \n and tab) and 0x7F - 0x9F.
     $message = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/u','?',$message);
-    file_put_contents($this->uri, $message);
-    $this->updateReportTable($uploadId, $this->jobId, $this->uri);
-  }
-
-  protected function updateReportTable($uploadId, $jobId, $fileName)
-  {
-    $this->reportutils->updateOrInsertReportgenEntry($uploadId, $jobId, $fileName);
+    $this->reportutils->saveTextReport($uploadId, $this->jobId, $this->uri, $message);
   }
 
   /**
