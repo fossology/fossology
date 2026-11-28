@@ -671,6 +671,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
+        '403':
+          description: >
+            Upload or destination folder is not accessible, or the user does
+            not have write permission to move the upload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
 

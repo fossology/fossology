@@ -21,6 +21,7 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\UI\Api\Exceptions\HttpBadRequestException;
+use Fossology\UI\Api\Exceptions\HttpForbiddenException;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Mockery as M;
@@ -202,6 +203,76 @@ class RestHelperTest extends \PHPUnit\Framework\TestCase
     $actual = $this->restHelper->copyUpload($uploadId, $newFolderId, $isCopy);
 
     $this->assertEquals($expected, $actual);
+  }
+
+  /**
+   * @test
+   * -# Test for RestHelper::copyUpload() with move operation
+   * -# Check if move succeeds when user has write permission
+   */
+  public function testMoveUpload()
+  {
+    $uploadId = 5;
+    $newFolderId = 10;
+    $isCopy = false;
+    $uploadContentId = 44;
+
+    $this->folderDao->shouldReceive('isFolderAccessible')
+      ->withArgs([$newFolderId, $this->userId])
+      ->once()
+      ->andReturn(true);
+    $this->uploadPermissionDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])
+      ->once()
+      ->andReturn(true);
+    $this->uploadPermissionDao->shouldReceive('isEditable')
+      ->withArgs([$uploadId, $this->groupId])
+      ->once()
+      ->andReturn(true);
+    $this->folderDao->shouldReceive('getFolderContentsId')
+      ->withArgs([$uploadId, 2])
+      ->once()
+      ->andReturn($uploadContentId);
+    $this->contentMovePlugin->shouldReceive('copyContent')
+      ->withArgs([[$uploadContentId], $newFolderId, $isCopy])
+      ->once()
+      ->andReturn("");
+
+    $expected = new Info(202, "Upload $uploadId will be moved to folder " .
+      $newFolderId, InfoType::INFO);
+    $actual = $this->restHelper->copyUpload($uploadId, $newFolderId, $isCopy);
+
+    $this->assertEquals($expected, $actual);
+  }
+
+  /**
+   * @test
+   * -# Test for RestHelper::copyUpload() with move operation without write permission
+   * -# Check if HttpForbiddenException is thrown
+   */
+  public function testMoveUploadNotEditableThrowsForbidden()
+  {
+    $uploadId = 5;
+    $newFolderId = 10;
+    $isCopy = false;
+
+    $this->folderDao->shouldReceive('isFolderAccessible')
+      ->withArgs([$newFolderId, $this->userId])
+      ->once()
+      ->andReturn(true);
+    $this->uploadPermissionDao->shouldReceive('isAccessible')
+      ->withArgs([$uploadId, $this->groupId])
+      ->once()
+      ->andReturn(true);
+    $this->uploadPermissionDao->shouldReceive('isEditable')
+      ->withArgs([$uploadId, $this->groupId])
+      ->once()
+      ->andReturn(false);
+    $this->folderDao->shouldNotReceive('getFolderContentsId');
+    $this->contentMovePlugin->shouldNotReceive('copyContent');
+
+    $this->expectException(HttpForbiddenException::class);
+    $this->restHelper->copyUpload($uploadId, $newFolderId, $isCopy);
   }
 
   /**
