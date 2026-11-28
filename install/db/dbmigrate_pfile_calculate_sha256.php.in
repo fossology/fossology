@@ -33,17 +33,22 @@ function checkCorrectUser()
   return true;
 }
 
-function explainPfileUsage()
+/**
+ * @brief Print the usage and exit.
+ *
+ * @param int $exitCode status to exit with: 0 for -h, 1 for an invalid option
+ */
+function explainPfileUsage($exitCode = 0)
 {
   global $argv;
 
   $usage = "Usage: " . basename($argv[0]) . " [options]
   Calculate the SHA256 hash of files pointed by pfile table. Options are:
   -c  path to fossology configuration files
-  -d  {database name} default is 'fossology'
+  -d  {database name} default is the dbname from Db.conf
   -h  this help usage";
   print "$usage\n";
-  exit(0);
+  exit($exitCode);
 }
 
 /* Condition must be satisfied */
@@ -59,7 +64,7 @@ if (!checkCorrectUser()) {
 $AllPossibleOpts = "abc:d:efghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 /* defaults */
-$DatabaseName = "fossology";
+$DatabaseName = null;
 $sysconfdir = "@FO_SYSCONFDIR@";
 $force = true;
 
@@ -73,6 +78,10 @@ foreach($Options as $optKey => $optVal)
       $sysconfdir = $optVal;
       break;
     case 'd': /* optional database name */
+      if (!is_string($optVal) || trim($optVal) === '') {
+        echo "Error: option -d requires a non-empty database name.\n";
+        exit(1);
+      }
       $DatabaseName = $optVal;
       break;
     case 'h': /* help */
@@ -80,14 +89,46 @@ foreach($Options as $optKey => $optVal)
       break;
     default:
       echo "Invalid Option \"$optKey\".\n";
-      explainUsage();
+      explainPfileUsage(1);
   }
 }
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
 $SysConf = bootstrap($sysconfdir);
-$SysConf["DBCONF"]["dbname"] = $DatabaseName;
-$GLOBALS["SysConf"] = array_merge($GLOBALS["SysConf"], $SysConf);
+
+require_once("$MODDIR/lib/php/common-sysconfig.php");
+require_once("$MODDIR/vendor/autoload.php");
+require_once("$MODDIR/lib/php/common-db.php");
+require_once("$MODDIR/lib/php/common-container.php");
+
+/* The database name comes from -d or, by default, from Db.conf */
+$dbConf = parse_ini_file("$SYSCONFDIR/Db.conf");
+if (!is_array($dbConf) || empty($dbConf['dbname'])) {
+  print "FATAL: unable to read the database name from $SYSCONFDIR/Db.conf\n";
+  exit(1);
+}
+
+/*
+ * -d has to override the database name from Db.conf.  ConfigInit() reloads
+ * Db.conf into $SysConf and DBconnect() builds the connection from that file,
+ * so open the connection for the requested database first: DBconnect() reuses
+ * an already opened connection.  The catalog name is re-applied below, after
+ * ConfigInit() has parsed Db.conf.
+ */
+if (!empty($DatabaseName)) {
+  $dbConf['dbname'] = $DatabaseName;
+  $dsn = array();
+  foreach ($dbConf as $key => $value) {
+    $dsn[] = "$key='" . str_replace("'", "\\'", $value) . "'";
+  }
+  /* Do not let DBconnect() exit with status 0 on a failed connection */
+  DBconnect($SYSCONFDIR, implode(' ', $dsn), false);
+  if (empty($GLOBALS['PG_CONN'])) {
+    print "FATAL: unable to connect to database '$DatabaseName'.\n";
+    exit(1);
+  }
+}
+
 $projectGroup = $SysConf['DIRECTORIES']['PROJECTGROUP'] ?: 'fossy';
 $gInfo = posix_getgrnam($projectGroup);
 posix_setgid($gInfo['gid']);
@@ -98,14 +139,16 @@ if (!preg_match("/\s$projectGroup\s/",$groups) && (posix_getgid() != $gInfo['gid
   exit(1);
 }
 
-require_once("$MODDIR/vendor/autoload.php");
-require_once("$MODDIR/lib/php/common-db.php");
-require_once("$MODDIR/lib/php/common-container.php");
-require_once("$MODDIR/lib/php/common-sysconfig.php");
-
 /* Initialize global system configuration variables $SysConfig[] */
 ConfigInit($SYSCONFDIR, $SysConf);
 
+/* Keep the catalog name in sync with -d (ConfigInit() reloaded Db.conf) */
+if (!empty($DatabaseName)) {
+  $SysConf['DBCONF']['dbname'] = $DatabaseName;
+}
+
 $dbManager = $GLOBALS["container"]->get("db.manager");
 
-updatePfileSha256($dbManager, $force);
+/* Propagate the result: 0 only when the migration completed */
+$returnCode = updatePfileSha256($dbManager, $force);
+exit($returnCode === 0 ? 0 : 1);

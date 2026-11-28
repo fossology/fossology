@@ -280,6 +280,7 @@ function updatePfileSha256($dbManager, $force = false)
     $dbManager->rollback();
     return -1;
   }
+  return 0;
 }
 
 /**
